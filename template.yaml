@@ -1,0 +1,25 @@
+Resources:
+  WebhookApi:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: main.handler
+      Runtime: python3.12
+      MemorySize: 512
+      Timeout: 10
+      Events:
+        Webhook:
+          Type: Api
+          Properties:
+            Path: /webhook
+            Method: post
+      Environment:
+        Variables:
+          STAGE: prod
+          WEBHOOK_USERNAME: !Ref WebhookUsername
+          WEBHOOK_PASSWORD: !Ref WebhookPassword
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt DownloadQueue.QueueName
+        - DynamoDBWritePolicy:
+            TableName: !Ref OrdersTable
