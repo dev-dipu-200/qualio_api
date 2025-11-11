@@ -6,6 +6,7 @@ import logging
 from requests.adapters import HTTPAdapter
 from config.settings import settings
 from services.graphql_queries import (
+    GET_MESSAGES_LIST_QUERY,
     GET_ORDER_QUERY,
     GET_ORDERS_QUERY,
     ACCEPT_ORDER_MUTATION,
@@ -277,6 +278,89 @@ class QualiaClient:
         })
         raise RuntimeError(f"Max retries exceeded for order {order_id}")
 
+    def get_messages(self, filters: dict = None, max_retries: int = 5):
+        """Get messages via Qualia GraphQL API with retry logic.
+
+        Args:
+            filters: Optional dictionary with filters (limit, offset, activity_type)
+            max_retries: Maximum number of retry attempts
+
+        Returns:
+            dict: Response from the messages query
+        """
+        variables = {
+            "input": filters if filters else {}
+        }
+
+        payload = {
+            "query": GET_MESSAGES_QUERY,
+            "variables": variables
+        }
+
+        logger.info("Fetching messages via Qualia GraphQL API", extra={
+            "filters": filters
+        })
+
+        for attempt in range(max_retries):
+            try:
+                resp = self.session.post(self.graphql_url, json=payload, timeout=30)
+
+                if resp.status_code == 200:
+                    data = resp.json()
+
+                    # Check for GraphQL errors
+                    if "errors" in data:
+                        logger.error("GraphQL errors for messages", extra={
+                            "errors": data["errors"]
+                        })
+                        raise RuntimeError(f"GraphQL errors: {data['errors']}")
+
+                    logger.info("Successfully fetched messages", extra={
+                        "attempt": attempt + 1,
+                        "filters": filters
+                    })
+                    return data.get("data", {})
+
+                elif resp.status_code == 429:
+                    wait = (2 ** attempt) + random.uniform(0, 2)
+                    logger.warning(f"Rate limited for messages, waiting {wait:.2f}s", extra={
+                        "attempt": attempt + 1,
+                        "wait_seconds": wait
+                    })
+                    time.sleep(wait)
+                    continue
+
+                elif resp.status_code in (401, 403, 404):
+                    logger.error(f"Permanent error {resp.status_code} for messages", extra={
+                        "status_code": resp.status_code,
+                        "response": resp.text
+                    })
+                    raise RuntimeError(f"Permanent error {resp.status_code}: {resp.text}")
+
+                else:
+                    wait = 2 ** attempt
+                    logger.warning(f"HTTP {resp.status_code} for messages, retrying in {wait}s", extra={
+                        "status_code": resp.status_code,
+                        "attempt": attempt + 1,
+                        "wait_seconds": wait
+                    })
+                    time.sleep(wait)
+
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Request exception for messages: {str(e)}", extra={
+                    "attempt": attempt + 1,
+                    "error": str(e)
+                })
+                if attempt == max_retries - 1:
+                    raise
+                wait = (2 ** attempt) + random.uniform(0, 1)
+                time.sleep(wait)
+
+        logger.error("Max retries exceeded for fetching messages", extra={
+            "max_retries": max_retries
+        })
+        raise RuntimeError("Max retries exceeded for messages")
+
     def accept_order(self, order_id: str, max_retries: int = 5):
         """Accept an order via Qualia GraphQL API with retry logic.
 
@@ -508,6 +592,24 @@ class QualiaClient:
             max_retries=max_retries
         )
 
+    def get_messages_list(self):
+        """Get messages for an order via Qualia GraphQL API with retry logic."""
+        payload = {
+            "query": GET_MESSAGES_LIST_QUERY
+        }
+        try:
+            resp = self.session.post(self.graphql_url, json=payload, timeout=30)
+            if resp.status_code == 200:
+                data = resp.json()
+                return data.get("data", {})
+            else:
+                resp.raise_for_status()
+        except Exception as e:
+            logger.error(f"Logging error while fetching messages: {str(e)}", extra={
+                "error": str(e)
+            })
+
+    
     def add_files(self, order_id: str, files: dict, max_retries: int = 5):
         """Add files to an order via Qualia GraphQL API with retry logic.
 

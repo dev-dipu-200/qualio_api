@@ -294,6 +294,17 @@ async def send_message(
         logger.error(f"Unexpected error sending message to order {message_input.order_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
+@router.get("/messages/")
+async def get_messages(
+    client: QualiaClient = Depends(get_qualia_client)
+):
+    """
+    Retrieve messages for a specific order via Qualia GraphQL API.
+    Args:
+        order_id: The unique identifier of the order to retrieve messages for
+        client: QualiaClient instance (injected via dependency)
+    """
+    return client.get_messages_list()
 
 @router.post("/files/add", response_model=Dict[str, Any])
 async def add_files(

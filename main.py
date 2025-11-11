@@ -4,6 +4,7 @@ import logging
 from fastapi import FastAPI
 from mangum import Mangum
 from handlers.webhook_handler import router as webhook_router
+from handlers.message_webhook_handler import router as message_webhook_router
 from routers.order import router as order_router
 
 # Configure logging for Lambda/CloudWatch
@@ -31,6 +32,7 @@ async def health():
 
 # Include webhook routes
 app.include_router(webhook_router, prefix="/webhook", tags=["Webhook"])
+app.include_router(message_webhook_router, prefix="/webhook/activity", tags=["Activity Webhook"])
 app.include_router(order_router.router)
 
 # Lambda handler

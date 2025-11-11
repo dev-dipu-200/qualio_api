@@ -2,11 +2,20 @@
 import os
 from functools import lru_cache
 from pydantic_settings import BaseSettings
+from typing import Optional
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     STAGE: str = os.getenv("STAGE", "dev")
     AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
+
+    # AWS Credentials (optional, can use AWS CLI config or IAM roles)
+    AWS_ACCESS_KEY_ID: Optional[str] = None
+    AWS_SECRET_ACCESS_KEY: Optional[str] = None
+
+    # LocalStack Configuration
+    USE_LOCALSTACK: Optional[str] = None
+    LOCALSTACK_ENDPOINT: Optional[str] = None
 
     # Secrets
     WEBHOOK_USERNAME: str

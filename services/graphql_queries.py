@@ -233,21 +233,6 @@ query GetOrder($input: ID!) {
         url
         tag
       }
-      messages {
-        order_id
-        message_id
-        order_number
-        from_name
-        read
-        text
-        attachments {
-          _id
-          name
-          url
-          tag
-        }
-        created_date
-      }
       activities {
         _id
         order_id
@@ -309,7 +294,7 @@ query GetOrder($input: ID!) {
 }
 """
 
-GET_MESSAGES_QUERY = """
+GET_MESSAGES_LIST_QUERY = """
 query Messages {
     messages {
         order_id
