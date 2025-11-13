@@ -18,8 +18,7 @@ class Settings(BaseSettings):
     LOCALSTACK_ENDPOINT: Optional[str] = None
 
     # Secrets
-    WEBHOOK_USERNAME: str
-    WEBHOOK_PASSWORD: str
+    WEBHOOK_TOKEN: str
     QUALIA_API_TOKEN: str
     INTERNAL_API_TOKEN: str
     INTERNAL_API_URL: str

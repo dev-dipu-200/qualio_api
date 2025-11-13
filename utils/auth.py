@@ -1,18 +1,38 @@
 # utils/auth.py
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import HTTPException, status, Header
 from config.settings import settings
 
-security = HTTPBasic()
+def verify_webhook_auth(authorization: str = Header(None)):
+    """
+    Verify webhook authentication using Authorization header with Basic token format.
+    Expected format: Authorization: Basic <token>
+    """
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing Authorization header",
+            headers={"WWW-Authenticate": "Basic"},
+        )
 
-def verify_webhook_auth(credentials: HTTPBasicCredentials = Depends(security)):
-    correct_username = settings.WEBHOOK_USERNAME
-    correct_password = settings.WEBHOOK_PASSWORD
+    # Check if it starts with "Basic "
+    if not authorization.startswith("Basic "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Authorization header format. Expected: 'Basic <token>'",
+            headers={"WWW-Authenticate": "Basic"},
+        )
 
-    if not (credentials.username == correct_username and credentials.password == correct_password):
+    # Extract the token
+    token = authorization[6:]  # Remove "Basic " prefix
+
+    # Compare with the expected token from settings
+    expected_token = settings.WEBHOOK_TOKEN
+
+    if token != expected_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Basic"},
         )
-    return credentials
+
+    return True

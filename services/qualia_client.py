@@ -44,7 +44,7 @@ class QualiaClient:
 
     def download_order(self, order_id: str, max_retries: int = 5):
         """Download order details from Qualia API with retry logic."""
-        url = f"{self.base_url}/orders/{order_id}"
+        url = f"{self.graphql_url}/orders/{order_id}"
         logger.info(f"Downloading order {order_id} from Qualia API", extra={
             "order_id": order_id,
             "url": url

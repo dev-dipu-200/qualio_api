@@ -1,0 +1,34 @@
+# .env
+STAGE=dev
+AWS_REGION=us-east-1
+
+# AWS Credentials (use 'test' values for LocalStack)
+AWS_ACCESS_KEY_ID=test
+AWS_SECRET_ACCESS_KEY=test
+
+# LocalStack Configuration
+USE_LOCALSTACK=true
+LOCALSTACK_ENDPOINT=http://localhost:4566
+
+# Webhook Authentication
+# Use the token with Authorization header: Basic <token>
+WEBHOOK_TOKEN=bXR4OllIZWllZHlLWHhBbnc5WFhjM1QwZVEzam9Ka3ozRFMzenJLQnFpdHh2Wms=
+
+# Qualia API
+QUALIA_API_TOKEN='bXR4OllIZWllZHlLWHhBbnc5WFhjM1QwZVEzam9Ka3ozRFMzenJLQnFpdHh2Wms='
+
+# Internal API
+INTERNAL_API_TOKEN=internal-secret
+INTERNAL_API_URL='http://localhost:8000/'
+
+# SQS Queues (LocalStack)
+DOWNLOAD_QUEUE_URL=http://localhost:4566/000000000000/qualia-download-queue-dev
+PROCESSING_QUEUE_URL=http://localhost:4566/000000000000/qualia-processing-queue-dev
+
+
+
+# Key: bXR4OllIZWllZHlLWHhBbnc5WFhjM1QwZVEzam9Ka3ozRFMzenJLQnFpdHh2Wms=
+# Username: mtx
+# Password: YHeiedyKXxAnw9XXc3T0eQ3joJkz3DS3zrKBqitxvZk
+# Example request header usage:
+# Authorization: Basic bXR4OllIZWllZHlLWHhBbnc5WFhjM1QwZVEzam9Ka3ozRFMzenJLQnFpdHh2Wms=
